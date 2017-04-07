@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>projectMaui</title> 
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">projectMaui</h1>
+      <form>        
+        <div class="row">
+          <div class="col-xs-6">
+              <input class="btn btn-success btn-sm" onclick="garageLightToggle()" value="garageLight"></div>
+          <div class="col-xs-3">
+              <img src="garageLightXYZZY" alt="Light" style="width:40px;height:40px;"></div>
+        </div>  
+        <div class="row">
+          <div class="col-xs-6">
+             <input class="btn btn-success btn-sm" onclick="frontLightToggle()" value="frontLight(TBD)"></div>
+          <div class="col-xs-3"> <img src="frontLightXYZZY" alt="Light" style="width:40px;height:40px;"></div>
+        </div>        
+          <h2 class="header">Night</h2>
+        <div class="row">
+          <div class="form-group col-xs-3">
+              <label for="nighthour">Hour</label>
+              <select id="nighthour" name="nighthour" class="form-control"></select>
+            </div>
+            <div class="form-group col-xs-3">
+              <label for="nightminute">Minute</label>
+              <select id="nightminute" name="nightminute" class="form-control"></select>
+            </div>       
+        </div> 
+    <h2 class="header">Morning</h2>
+        <div class="row">
+          <div class="form-group col-xs-3">
+              <label for="morninghour">Hour</label>
+              <select id="morninghour" name="morninghour" class="form-control"></select>
+            </div>
+            <div class="form-group col-xs-3">
+              <label for="morningminute">Minute</label>
+              <select id="morningminute" name="morningminute" class="form-control"></select>
+            </div>        
+        <div class="form-group col-xs-3">
+        <label>Go</label>
+          <input class="form-control btn btn-success" type="submit" value="Set">
+        </div>
+        </div>
+      </form>       
+<div class="page-header">
+<h2>Environment</h2> </div>     
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Sensor</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Temperature (deg F)</td>
+                  <td>tempNowXYZZY</td>
+                </tr>
+                <tr>
+                  <td>MyIpAddress</td>
+                  <td>ipNowXYZZY</td>
+                </tr>
+             
+              </tbody>
+            </table>
+    </div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+var   nighthour = document.getElementById("nighthour"),
+      nightminute = document.getElementById("nightminute"),
+      morninghour = document.getElementById("morninghour"),
+      morningminute = document.getElementById("morningminute");
+      
+
+      function option(num) {
+        var opt = document.createElement("option");
+        opt.setAttribute("value", num);
+        opt.text = num.toString();
+        return opt;
+      }
+      function range(start, end) {
+        var arr = [start];
+        start++;
+        while(start <= end) {
+          arr.push(start);
+          start++;
+        }
+        return arr;
+      }
+      function setAlarm(req) {
+        var json;
+        try {
+          json = JSON.parse(this.response);
+        } catch (e) {
+          console.log("Client error in JSON parsing");
+          return; // unable to parse JSON, something went wrong
+        }
+        nighthour.value = json.nighthour;
+        nightminute.value = json.nightminute;
+        morninghour.value = json.morninghour;
+        morningminute.value = json.morningminute;
+        
+        console.log("in client setalarm nighthour ", nighthour.value, " minute ", nightminute.value);
+        console.log("in client setalarm morninghour ", morninghour.value, " minute ", morningminute.value);
+      }
+
+      function fetch() {
+        var req = new XMLHttpRequest();
+        req.addEventListener("load", setAlarm);
+        req.open("get", "/alarm.json", true);
+        req.send();
+      }
+
+      function alarm_main() {
+        range(0, 23).map(option).forEach(function(opt) { nighthour.add(opt); });
+        range(0, 59).map(option).forEach(function(opt) { nightminute.add(opt); });
+        range(0, 23).map(option).forEach(function(opt) { morninghour.add(opt); });
+        range(0, 59).map(option).forEach(function(opt) { morningminute.add(opt); });    
+        fetch();
+      }
+  
+alarm_main();
+
+var socket = io('http://192.168.1.182:3000');
+var currentTemp;
+  
+socket.on('reload', function (data) {
+    console.log("client just got reload request ", data);
+    location.reload();
+  });
+
+// socket.on('iotTemp', function (data) {
+//    console.log("in client entering socket.on signal ioTemp");
+//     currentTemp = data;
+//     console.log("client just got iotTemp ", currentTemp);
+//   });
+
+// implement button press
+function frontLightToggle() {
+  console.log("entering frontLightToggle client but this is not implemented");
+//  socket.emit('frontLightToggle', { frontLightToggle: 'toggle' });
+  // remember to create a second socket to both lights and control together
+};
+
+// implement button press
+  function garageLightToggle() {
+    console.log("entering garageLightToggle client");
+    socket.emit('garageLightToggle', { garageLightToggle: 'toggle' });
+};
+
+</script>
+</body>
+</html>
